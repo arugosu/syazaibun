@@ -1,0 +1,1875 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>昨日の件｜謝罪文組み立てノベル</title>
+    <meta name="description" content="何をやらかしたか覚えていない主人公が、LINEで謝罪文を作って送るノベル風ミニゲーム。">
+    <meta name="theme-color" content="#18181b">
+
+    <!-- OGP / SNSシェア設定 -->
+    <meta property="og:title" content="昨日の件｜謝罪文組み立てノベル">
+    <meta property="og:description" content="何をやらかしたか覚えていない主人公が、LINEで謝罪文を作って送るノベル風ミニゲーム。">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="昨日の件｜謝罪文組み立てノベル">
+    <meta name="twitter:description" content="何をやらかしたか覚えていない主人公が、LINEで謝罪文を作って送るノベル風ミニゲーム。">
+
+    <!-- インラインSVGファビコン（外部ファイル不要） -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%231e293b'/%3E%3Cpath d='M16 20h32a4 4 0 0 1 4 4v16a4 4 0 0 1-4 4H26l-8 7v-7h-2a4 4 0 0 1-4-4V24a4 4 0 0 1 4-4z' fill='%238de055'/%3E%3Ccircle cx='25' cy='32' r='2.5' fill='%231e293b'/%3E%3Ccircle cx='32' cy='32' r='2.5' fill='%231e293b'/%3E%3Ccircle cx='39' cy='32' r='2.5' fill='%231e293b'/%3E%3C/svg%3E">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --font-sans: 'Noto Sans JP', sans-serif;
+            --font-serif: 'Noto Serif JP', serif;
+        }
+        body {
+            font-family: var(--font-sans);
+            background-color: #18181b;
+            color: #1f2937;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .font-novel {
+            font-family: var(--font-serif);
+        }
+        /* スマホ縦画面フレーム（PCでも快適に表示・操作できるよう調整） */
+        #app-frame {
+            width: 100%;
+            max-width: 520px;
+            height: 100dvh;
+            margin: 0 auto;
+            background-color: #f8fafc;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 40px rgba(0,0,0,0.5);
+        }
+        @media (min-width: 640px) {
+            body {
+                padding: 16px 0;
+            }
+            #app-frame {
+                height: calc(100dvh - 32px);
+                border-radius: 20px;
+            }
+        }
+        /* カスタムスクロールバー */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.55);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(107, 114, 128, 0.8);
+        }
+        /* アニメーション */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.35s ease-out forwards;
+        }
+        @keyframes pulseDot {
+            0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+        .typing-dot:nth-child(1) { animation: pulseDot 1.2s infinite ease-in-out 0s; }
+        .typing-dot:nth-child(2) { animation: pulseDot 1.2s infinite ease-in-out 0.2s; }
+        .typing-dot:nth-child(3) { animation: pulseDot 1.2s infinite ease-in-out 0.4s; }
+
+        /* LINE風吹き出しのしっぽ */
+        .bubble-left {
+            position: relative;
+            background: #ffffff;
+            border-radius: 16px;
+            border-top-left-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+        }
+        .bubble-right {
+            position: relative;
+            background: #8de055;
+            color: #111827;
+            border-radius: 16px;
+            border-top-right-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+        }
+        /* ノベル画面テキストフェード */
+        .novel-line {
+            opacity: 0;
+            transform: translateY(4px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        .novel-line.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+<div id="app-frame">
+    <!-- ==================== 1. タイトル画面 ==================== -->
+    <div id="screen-title" class="flex-1 flex flex-col justify-between p-8 bg-slate-50 text-slate-800 relative">
+        <div class="flex justify-end items-center">
+            <button id="btn-sound-toggle" class="p-2.5 rounded-full bg-slate-200/70 text-slate-600 hover:bg-slate-200 transition text-xs flex items-center gap-1.5" aria-label="音声切り替え">
+                <span id="sound-icon">🔊</span>
+                <span id="sound-label">音あり</span>
+            </button>
+        </div>
+
+        <div class="my-auto text-center space-y-6">
+            <div class="inline-block px-3 py-1 rounded-full bg-slate-200/80 text-slate-600 text-xs tracking-widest">
+                謝罪文組み立てノベル
+            </div>
+            <h1 class="text-4xl font-bold tracking-widest text-slate-900 font-novel py-2">
+                昨日の件
+            </h1>
+            <p class="text-xs text-slate-500 leading-relaxed">
+                何をやらかしたか覚えていない。<br>
+                とりあえず、長い謝罪文を送らなければならない。
+            </p>
+        </div>
+
+        <div class="space-y-3 pb-4">
+            <button id="btn-start" class="w-full py-4 rounded-xl bg-slate-900 text-white font-medium tracking-wider shadow-md hover:bg-slate-800 active:scale-[0.99] transition">
+                はじめる
+            </button>
+            <div class="grid grid-cols-2 gap-3">
+                <button id="btn-title-endings" class="py-3 rounded-xl bg-white border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-100 transition">
+                    エンド一覧 (<span id="title-end-count">0</span>/5)
+                </button>
+                <button id="btn-reset-confirm" class="py-3 rounded-xl bg-white border border-slate-200 text-slate-400 text-sm hover:text-red-500 hover:border-red-200 transition">
+                    最初から
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 2. ノベル画面（プロローグ / 結末 / 解放イベント / 真相ラスト） ==================== -->
+    <div id="screen-novel" class="hidden flex-1 min-h-0 flex flex-col p-6 relative transition-colors duration-1000 cursor-pointer">
+        <!-- 背景イラストレイヤー（SVG） -->
+        <div id="novel-bg-layer" class="absolute inset-0 pointer-events-none overflow-hidden opacity-25 transition-opacity duration-1000"></div>
+
+        <!-- 上部バー（スキップボタンなど） -->
+        <div class="relative z-10 flex justify-between items-center min-h-[36px] shrink-0">
+            <span id="novel-badge" class="text-xs tracking-widest opacity-60"></span>
+            <button id="btn-novel-skip" class="hidden px-3 py-1.5 rounded-lg bg-black/10 hover:bg-black/20 text-xs backdrop-blur-sm transition">
+                スキップ ▶▶
+            </button>
+        </div>
+
+        <!-- テキスト表示エリア（長文でも画面外に飛び出さず確実にスクロール） -->
+        <div id="novel-scroll-wrapper" class="relative z-10 flex-1 min-h-0 overflow-y-auto my-3 pr-1 flex flex-col">
+            <div id="novel-text-container" class="my-auto py-2 space-y-4 font-novel text-[15px] sm:text-base leading-8">
+                <!-- JSで動的に行を追加 -->
+            </div>
+        </div>
+
+        <!-- 下部アクションエリア（常に画面下部に固定表示） -->
+        <div class="relative z-10 pt-2 pb-2 shrink-0 flex flex-col items-center">
+            <div id="novel-tap-hint" class="text-xs opacity-55 animate-pulse mb-1">
+                タップ / クリック（または Enter）で進む
+            </div>
+            <button id="btn-novel-next" class="hidden w-full py-3.5 rounded-xl font-medium tracking-wider shadow-sm transition active:scale-[0.99]">
+                次へ
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== 3. 謝罪文組み立て画面 ==================== -->
+    <div id="screen-compose" class="hidden flex-1 min-h-0 flex flex-col bg-slate-100 text-slate-800">
+        <!-- ヘッダー -->
+        <header class="bg-white px-4 py-3 border-b border-slate-200 flex justify-between items-center shrink-0">
+            <div class="flex items-center gap-2">
+                <button id="btn-compose-to-title" class="p-2 -ml-2 text-slate-400 hover:text-slate-700 rounded-lg transition text-xs">
+                    ← タイトル
+                </button>
+                <span class="font-bold text-sm text-slate-700">柏木 への返信作成</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="btn-open-endings" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-medium transition">
+                    記録 (<span id="compose-end-count">0</span>/5)
+                </button>
+                <button id="btn-open-memo" class="px-3 py-1.5 rounded-lg bg-amber-50 border border-amber-200 hover:bg-amber-100 text-amber-800 text-xs font-medium flex items-center gap-1 transition relative">
+                    <span>メモ</span>
+                    <span id="memo-badge" class="bg-amber-500 text-white text-[10px] px-1.5 rounded-full">0</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- 上部：プレビュー欄 -->
+        <div class="p-4 pb-2 shrink-0">
+            <div class="text-[11px] text-slate-500 mb-1.5 flex justify-between items-center">
+                <span>送信メッセージ プレビュー</span>
+                <button id="btn-clear-slots" class="text-slate-400 hover:text-slate-600 underline">リセット</button>
+            </div>
+            <div id="compose-preview" class="bg-white border border-slate-200 rounded-2xl p-3.5 min-h-[104px] max-h-[136px] overflow-y-auto text-[13.5px] sm:text-sm leading-relaxed text-slate-800 shadow-inner break-words">
+                <!-- JSで連結文を描画 -->
+            </div>
+        </div>
+
+        <!-- 中部：4つのスロット -->
+        <div class="flex-1 min-h-0 px-4 py-2 overflow-y-auto space-y-2.5">
+            <div class="text-[11px] text-slate-500 mb-1 flex justify-between">
+                <span>タップして文章を選択（全4箇所）</span>
+                <span class="hidden sm:inline text-slate-400">キー操作: 1〜4</span>
+            </div>
+            
+            <button data-stage="1" class="slot-btn w-full text-left bg-white hover:bg-slate-50 hover:border-slate-300 border border-slate-200 rounded-xl p-3 transition flex items-start gap-3 shadow-sm">
+                <span class="shrink-0 w-6 h-6 rounded-full bg-slate-800 text-white text-xs flex items-center justify-center font-bold mt-0.5">①</span>
+                <div class="flex-1 min-w-0">
+                    <div class="text-[11px] text-slate-400">原因・理由</div>
+                    <div id="slot-text-1" class="text-xs sm:text-sm text-slate-400 break-words mt-0.5">？（タップして選択）</div>
+                </div>
+            </button>
+
+            <button data-stage="2" class="slot-btn w-full text-left bg-white hover:bg-slate-50 hover:border-slate-300 border border-slate-200 rounded-xl p-3 transition flex items-start gap-3 shadow-sm">
+                <span class="shrink-0 w-6 h-6 rounded-full bg-slate-800 text-white text-xs flex items-center justify-center font-bold mt-0.5">②</span>
+                <div class="flex-1 min-w-0">
+                    <div class="text-[11px] text-slate-400">昨夜の状況</div>
+                    <div id="slot-text-2" class="text-xs sm:text-sm text-slate-400 break-words mt-0.5">？（タップして選択）</div>
+                </div>
+            </button>
+
+            <button data-stage="3" class="slot-btn w-full text-left bg-white hover:bg-slate-50 hover:border-slate-300 border border-slate-200 rounded-xl p-3 transition flex items-start gap-3 shadow-sm">
+                <span class="shrink-0 w-6 h-6 rounded-full bg-slate-800 text-white text-xs flex items-center justify-center font-bold mt-0.5">③</span>
+                <div class="flex-1 min-w-0">
+                    <div class="text-[11px] text-slate-400">現在のスタンス</div>
+                    <div id="slot-text-3" class="text-xs sm:text-sm text-slate-400 break-words mt-0.5">？（タップして選択）</div>
+                </div>
+            </button>
+
+            <button data-stage="4" class="slot-btn w-full text-left bg-white hover:bg-slate-50 hover:border-slate-300 border border-slate-200 rounded-xl p-3 transition flex items-start gap-3 shadow-sm">
+                <span class="shrink-0 w-6 h-6 rounded-full bg-slate-800 text-white text-xs flex items-center justify-center font-bold mt-0.5">④</span>
+                <div class="flex-1 min-w-0">
+                    <div class="text-[11px] text-slate-400">結び・対応</div>
+                    <div id="slot-text-4" class="text-xs sm:text-sm text-slate-400 break-words mt-0.5">？（タップして選択）</div>
+                </div>
+            </button>
+        </div>
+
+        <!-- 下部：送信ボタン -->
+        <div class="p-4 bg-white border-t border-slate-200 shrink-0">
+            <button id="btn-send-apology" disabled class="w-full py-3.5 rounded-xl font-bold text-sm tracking-wider transition bg-slate-200 text-slate-400 cursor-not-allowed">
+                4つすべて選択してください
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== 4. LINE風チャット画面 ==================== -->
+    <div id="screen-chat" class="hidden flex-1 min-h-0 flex flex-col bg-[#7494c0] text-slate-800">
+        <!-- トークヘッダー -->
+        <header class="bg-[#273246] text-white px-4 py-3 flex items-center justify-between shrink-0 shadow">
+            <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-full bg-slate-500 flex items-center justify-center text-xs font-bold text-white">
+                    柏
+                </div>
+                <div>
+                    <div class="font-bold text-sm">柏木</div>
+                    <div class="text-[10px] text-slate-300">同窓会幹事</div>
+                </div>
+            </div>
+            <div id="chat-status-hint" class="text-[11px] text-slate-300">
+                返信を待っています...
+            </div>
+        </header>
+
+        <!-- トーク履歴エリア -->
+        <div id="chat-messages" class="flex-1 min-h-0 p-4 overflow-y-auto space-y-3">
+            <!-- JSで吹き出しを追加 -->
+        </div>
+
+        <!-- 擬似入力欄（演出用＋次へボタン） -->
+        <div class="bg-white border-t border-slate-200 p-3 shrink-0">
+            <div id="chat-input-bar" class="flex items-center gap-2">
+                <div class="flex-1 bg-slate-100 rounded-full px-4 py-2 text-sm text-slate-700 min-h-[38px] flex items-center">
+                    <span id="chat-typing-sim" class="text-slate-800"></span>
+                    <span id="chat-placeholder" class="text-slate-400 text-xs">メッセージを入力</span>
+                </div>
+                <div class="w-9 h-9 rounded-full bg-slate-200 text-slate-400 flex items-center justify-center text-xs">
+                    送信
+                </div>
+            </div>
+            <button id="btn-chat-to-ending" class="hidden w-full py-3 rounded-xl bg-slate-900 text-white text-sm font-medium tracking-wider hover:bg-slate-800 transition animate-fade-in">
+                画面を閉じる
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== 5. 暗転END画面（真相エンド用） ==================== -->
+    <div id="screen-true-end" class="hidden flex-1 flex flex-col items-center justify-center bg-black text-white p-8">
+        <div id="true-end-text" class="font-novel text-2xl tracking-[0.4em] opacity-0 transition-opacity duration-1000">
+            END
+        </div>
+        <div id="true-end-actions" class="hidden mt-12 flex flex-col items-center gap-3 animate-fade-in">
+            <button id="btn-true-end-finish" class="px-7 py-2.5 rounded-full border border-white/30 text-xs text-white/80 hover:text-white hover:border-white transition">
+                記録を見る
+            </button>
+            <button id="btn-share-x" class="px-5 py-2 rounded-full bg-white/10 hover:bg-white/20 text-[11px] text-white/70 hover:text-white transition flex items-center gap-1.5">
+                <span>X で感想をポストする</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== モーダル：選択肢ポップアップ ==================== -->
+    <div id="modal-choices" class="hidden absolute inset-0 z-30 bg-black/50 backdrop-blur-[1px] flex flex-col justify-end">
+        <div class="bg-white rounded-t-3xl p-5 max-h-[82%] flex flex-col shadow-2xl animate-fade-in">
+            <div class="flex justify-between items-center pb-3 border-b border-slate-100 shrink-0">
+                <span id="modal-choice-title" class="font-bold text-sm text-slate-800">① 原因を選択</span>
+                <button id="btn-close-choices" class="p-2 text-slate-400 hover:text-slate-700 text-sm">閉じる ✕</button>
+            </div>
+            <div id="modal-choice-list" class="py-3 overflow-y-auto space-y-2.5">
+                <!-- 選択肢ボタン5個を動的生成（番号順固定・見た目均一） -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== モーダル：ヒントメモ画面 ==================== -->
+    <div id="modal-memo" class="hidden absolute inset-0 z-30 bg-black/50 backdrop-blur-[1px] flex items-center justify-center p-4">
+        <div class="bg-[#fffdf7] border border-amber-200 rounded-2xl w-full max-w-sm max-h-[80%] flex flex-col shadow-xl animate-fade-in">
+            <div class="px-5 py-4 border-b border-amber-100 flex justify-between items-center">
+                <div>
+                    <h2 class="font-bold text-amber-950 text-base">思い出のメモ</h2>
+                    <p class="text-[11px] text-amber-700/70">返信から引っかかった言葉の記録</p>
+                </div>
+                <button id="btn-close-memo" class="p-2 text-amber-800/60 hover:text-amber-950">✕</button>
+            </div>
+            <div id="memo-list" class="p-5 overflow-y-auto space-y-2.5 flex-1">
+                <!-- ヒント6枠を描画 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== モーダル：エンド一覧＆再読画面 ==================== -->
+    <div id="modal-endings" class="hidden absolute inset-0 z-30 bg-black/50 backdrop-blur-[1px] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-sm max-h-[85%] flex flex-col shadow-xl animate-fade-in overflow-hidden">
+            <div class="px-5 py-4 border-b border-slate-100 flex justify-between items-center shrink-0">
+                <h2 class="font-bold text-slate-800 text-base">エンディング一覧</h2>
+                <button id="btn-close-endings" class="p-2 text-slate-400 hover:text-slate-700">✕</button>
+            </div>
+            
+            <!-- 一覧リストビュー -->
+            <div id="endings-list-view" class="p-5 overflow-y-auto space-y-3 flex-1">
+                <!-- 5つのエンド枠を描画 -->
+            </div>
+
+            <!-- 再読ビュー -->
+            <div id="endings-read-view" class="hidden p-5 overflow-y-auto flex-1 flex flex-col justify-between bg-slate-50">
+                <div>
+                    <button id="btn-back-to-endings-list" class="text-xs text-slate-500 hover:text-slate-800 mb-3 inline-flex items-center gap-1">
+                        ← 一覧に戻る
+                    </button>
+                    <h3 id="reread-title" class="font-bold text-base text-slate-900 mb-4 pb-2 border-b border-slate-200"></h3>
+                    <div id="reread-content" class="font-novel text-sm leading-7 text-slate-700 space-y-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== モーダル：カスタム確認ダイアログ（alert/confirm禁止対策） ==================== -->
+    <div id="modal-dialog" class="hidden absolute inset-0 z-40 bg-black/60 flex items-center justify-center p-6">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-xs shadow-2xl space-y-4 animate-fade-in">
+            <h3 id="dialog-title" class="font-bold text-slate-900 text-base">確認</h3>
+            <p id="dialog-message" class="text-xs text-slate-600 leading-relaxed"></p>
+            <div class="flex justify-end gap-2 pt-2">
+                <button id="btn-dialog-cancel" class="px-4 py-2 rounded-lg text-xs text-slate-600 hover:bg-slate-100 transition">キャンセル</button>
+                <button id="btn-dialog-ok" class="px-4 py-2 rounded-lg text-xs bg-red-600 text-white hover:bg-red-700 transition">削除する</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+/**
+ * ============================================================================
+ * 1. ゲームデータ定義（仕様書 v1.2 準拠・テキスト改変なし）
+ * ============================================================================
+ */
+const PHRASE_DATA = {
+    prefix: "昨日の件、ご連絡ありがとうございます。",
+    stages: {
+        1: [
+            { id: "s1_1", type: "funny", text: "地球の自転がわずかに狂っていたせいで、" },
+            { id: "s1_2", type: "funny", text: "そもそも私の辞書から「謝罪」のページが破り取られていたため、" },
+            { id: "s1_3", type: "funny", text: "昨日食べた唐揚げ棒の衣が、まだ胃に残っているせいで、" },
+            { id: "s1_4", type: "serious", text: "久しぶりに地元に戻って、気が緩んでいたため、" },
+            {
+                id: "s1_5", type: "serious", text: "連絡を受けて、慌てて昨夜のことを思い返してみたところ、",
+                hidden: { id: "h1_5", unlock: 2, text: "昨夜のことだけでなく、三年前の朝のことも謝らなければならない気がするため、" }
+            }
+        ],
+        2: [
+            { id: "s2_a", type: "funny", text: "私の記憶では、昨夜は終始おとなしく烏龍茶を飲んでいただけなのですが、" },
+            { id: "s2_b", type: "funny", text: "おそらく私がカラオケで、同じ曲を四回も入れてしまったのだと思いますが、" },
+            { id: "s2_c", type: "funny", text: "気づいたら私のスマホに、居酒屋のお通しの写真が十一枚も保存されておりますが、" },
+            { id: "s2_d", type: "serious", text: "二次会の途中から、私の記憶がすっぽり抜け落ちておりますが、" },
+            {
+                id: "s2_e", type: "serious", text: "柏木さんには、かなりご迷惑をおかけしてしまったと聞いておりますが、",
+                hidden: { id: "h2_e", unlock: 1, text: "昨夜、見送りの話を持ち出して、場を静まり返らせてしまったらしいのですが、" }
+            }
+        ],
+        3: [
+            { id: "s3_A", type: "funny", text: "まあ人生には記憶のない夜もあるものだと割り切り、" },
+            { id: "s3_B", type: "funny", text: "反省の意だけを先に大気中に放出しておきつつ、" },
+            { id: "s3_C", type: "funny", text: "怒られるのは三割くらいで済むのではないかと見積もり、" },
+            { id: "s3_D", type: "serious", text: "全面的に自分に非があると受け止め、" },
+            {
+                id: "s3_E", type: "serious", text: "どんなお叱りも真摯に受ける所存で、",
+                hidden: { id: "h3_E", unlock: 3, text: "言った側が忘れていても、言われた側は忘れないものだと気づき、" }
+            }
+        ],
+        4: [
+            { id: "s4_1", type: "funny", text: "お詫びの品として、うちにある使っていないホットプレートを送ります。" },
+            { id: "s4_2", type: "funny", text: "なお、返信は風呂上がりに確認しますので、ゆっくりお待ちください。" },
+            { id: "s4_3", type: "funny", text: "これにて本件は円満に解決したものとさせていただきます。" },
+            { id: "s4_4", type: "serious", text: "改めて、直接お会いして謝罪させてください。" },
+            {
+                id: "s4_5", type: "serious", text: "許していただけるまで、何度でも連絡します。",
+                hidden: { id: "h4_5", unlock: 3, text: "三年前の寄せ書きがまだあるなら、受け取りに行かせてください。" }
+            }
+        ]
+    }
+};
+
+const HINTS_MASTER = [
+    { id: "H1", end: "FUN1", text: "柏木は「昨日はいろいろあったから」と言った。" },
+    { id: "H2", end: "FUN1", text: "グループLINEで「昨日の動画、途中でみんな黙ったよね」と聞いたら、全員が「それ」と返したらしい。" },
+    { id: "H3", end: "FUN2", text: "柏木は「見送り」という言葉を、久しぶりに聞いたと言った。" },
+    { id: "H4", end: "NORMAL", text: "柏木は「あの電車、いつも一本早いのが好きだったよね」と言った。" },
+    { id: "H5", end: "NORMAL", text: "柏木は「ホームって意外と広い。一人で立つと、特に」と言った。" },
+    { id: "H6", end: "FUN3", text: "柏木が送ってきた写真に、色紙のような厚紙が写っていた。色紙のことを、二回言っていた。" }
+];
+
+const UNLOCK_EVENTS = {
+    1: {
+        threshold: 2,
+        title: "記憶の断片 ①",
+        lines: [
+            "グループLINEに、動画が一本届いた。",
+            "再生する。",
+            "居酒屋の個室で、私が笑いながら何か言っている。",
+            "「結局さ、あのとき、誰も見送りに来なかったよな」",
+            "自分の声なのに、他人のものみたいに聞こえた。",
+            "周りが、静かになっていく。",
+            "画面の端で、柏木がグラスを置くのが見えた。",
+            "動画は、そこで止まった。",
+            "もう一度、書き直そう。"
+        ]
+    },
+    2: {
+        threshold: 4,
+        title: "記憶の断片 ②",
+        lines: [
+            "三年前の朝を、思い出した。",
+            "いつもより早く目が覚めた。",
+            "駅の自販機で、あまり好きじゃない缶コーヒーを買った。",
+            "時刻表を見た。",
+            "8時12分発の、一本前の電車があった。",
+            "見送りに来てくれるという話は、聞いていた。",
+            "私は、一本前の電車に乗った。",
+            "もう一度、書き直そう。"
+        ]
+    },
+    3: {
+        threshold: 6,
+        title: "記憶の断片 ③",
+        lines: [
+            "想像してみた。",
+            "朝の8時。",
+            "ホームに、クラスのみんなが少しずつ集まってくる。",
+            "柏木が、色紙を持っている。",
+            "電車が来る。ドアが開く。",
+            "私は、いない。",
+            "柏木は、そのあと、どうしたんだろう。",
+            "色紙を、家に持って帰ったのか。",
+            "もう一度、書き直そう。"
+        ]
+    }
+};
+
+const ENDINGS_DATA = {
+    FUN1: {
+        id: "FUN1",
+        order: 1,
+        title: "おふざけ① 全員が『それ』",
+        readTime: "9:12",
+        hints: ["H1", "H2"],
+        chatScript: [
+            { type: "kashiwagi", text: "読んだ" },
+            { type: "kashiwagi", text: "うん、まあ" },
+            { type: "kashiwagi", text: "…昨日はいろいろあったから" },
+            { type: "kashiwagi", text: "そういう感じで来るんだ" },
+            { type: "kashiwagi", text: "グループLINEでも聞いてみた" },
+            { type: "kashiwagi", text: "「昨日の動画、途中でみんな黙ったよね」って" },
+            { type: "kashiwagi", text: "全員から「それ」って返ってきた" },
+            { type: "kashiwagi", text: "何の動画かは自分で見て" }
+        ],
+        epilogue: [
+            "動画を開こうとして、やめた。",
+            "「それ」が十一個並んでいる。",
+            "十一人全員が同じことを思っていて、私だけが知らない。",
+            "何を書いたかより、何を言ったかのほうが、問題らしい。"
+        ]
+    },
+    FUN2: {
+        id: "FUN2",
+        order: 2,
+        title: "おふざけ② 寝ます",
+        readTime: "9:15",
+        hints: ["H3"],
+        chatScript: [
+            { type: "kashiwagi", text: "ごめん、読んだんだけど" },
+            { type: "kashiwagi", text: "半分くらい、何の話かわからなかった" },
+            { type: "kashiwagi", text: "でも、ちゃんと書いてくれたのは伝わった" },
+            { type: "kashiwagi", text: "「見送り」って言葉、久しぶりに聞いたな" },
+            { type: "kashiwagi", text: "…関係ないか" },
+            { type: "kashiwagi", text: "とりあえず、今日はもう返信しない" },
+            { type: "kashiwagi", text: "寝ます" }
+        ],
+        epilogue: [
+            "朝の9時に「寝ます」と言う人は、たぶん寝ない。",
+            "返信のなかの「見送り」だけが、変にひっかかる。",
+            "昨夜の私が言った言葉のどれかが、柏木のなかに残っている気がした。"
+        ]
+    },
+    FUN3: {
+        id: "FUN3",
+        order: 3,
+        title: "おふざけ③ 四人用",
+        readTime: "9:20",
+        hints: ["H6"],
+        chatScript: [
+            { type: "kashiwagi", text: "届いたよ" },
+            { type: "kashiwagi", text: "ホットプレート" },
+            { type: "kashiwagi", text: "…まだ送ってないよね？" },
+            { type: "kashiwagi", text: "うん、知ってる" },
+            { type: "kashiwagi", text: "でも送ってくれるなら、四人用がいい" },
+            { type: "kashiwagi", text: "置き場所、ここにする" },
+            { type: "photo" },
+            { type: "kashiwagi", text: "色紙どかせば置けるし" },
+            { type: "kashiwagi", text: "あ、色紙は冗談。どかさない" }
+        ],
+        epilogue: [
+            "写真の隅に、四角い厚紙の端が写っていた。",
+            "たぶん色紙だと思う。",
+            "色紙のことを、柏木は二回言った。",
+            "何の色紙かは、書いていない。"
+        ]
+    },
+    NORMAL: {
+        id: "NORMAL",
+        order: 4,
+        title: "普通 ホームは広い",
+        readTime: "9:30",
+        hints: ["H4", "H5"],
+        epilogue: [
+            "返信を打とうとして、画面を閉じた。",
+            "電車。ホーム。広い。一人。",
+            "一つずつなら意味がわかる。",
+            "並べると、ひとつの絵になりそうでならない。",
+            "柏木は怒っていなかった。",
+            "それだけが、少しだけつらい。"
+        ]
+    },
+    TRUE: {
+        id: "TRUE",
+        order: 5,
+        title: "真相 8時12分",
+        readTime: "9:41",
+        hints: [],
+        chatScript: [
+            { type: "kashiwagi", text: "……" },
+            { type: "typing_indicator", duration: 3000 },
+            { type: "kashiwagi", text: "思い出したんだ" },
+            { type: "kashiwagi", text: "昨日さ、笑って言うから、笑って流すしかなかった" },
+            { type: "kashiwagi", text: "「結局誰も見送りに来なかったよな」って" },
+            { type: "kashiwagi", text: "来てたんだよ、みんな。8時に" },
+            { type: "kashiwagi", text: "駅、朝の光が入って、すごく眩しかった" },
+            { type: "kashiwagi", text: "でも、いなかった。一本早いのに乗ってたんだよね" },
+            { type: "kashiwagi", text: "色紙は、私が持ってる" },
+            { type: "kashiwagi", text: "みんなで書いたやつ。唐揚げ棒の絵を描いたやつもいる" },
+            { type: "kashiwagi", text: "ずっと渡せなかった" },
+            { type: "kashiwagi", text: "棚の上で、たまに向きを変えてた。埃がたまらないように" },
+            { type: "gomen_erase" },
+            { type: "me", text: "受け取りに行く" },
+            { type: "kashiwagi", text: "今度の土曜、8時12分の電車で来て" },
+            { type: "kashiwagi", text: "一本早いのには、乗らないでね" },
+            { type: "me", text: "乗らない" },
+            { type: "kashiwagi", text: "うん" },
+            { type: "kashiwagi", text: "ホームで待ってる" }
+        ],
+        epilogue: [
+            "三年前の朝、私は缶コーヒーを一本買った。",
+            "あまり好きじゃない銘柄だった。",
+            "ホームの端のほうで、いつもより少しだけ長く、立っていた。",
+            "見送られるのが怖かったのだと思う。",
+            "どんな顔をすればいいのか、わからなかったから。",
+            "そのあと、同じホームに、柏木は色紙を持って立っていたはずだ。",
+            "その色紙は、たぶん今も、棚の上で向きを変えられながら、待っている。",
+            "土曜は、ちゃんと、8時12分の電車に乗る。"
+        ]
+    }
+};
+
+/**
+ * ============================================================================
+ * 2. サウンドエンジン（Tone.js - 外部ファイル不使用・トーン変化対応）
+ * ============================================================================
+ */
+class SoundEngine {
+    constructor() {
+        this.enabled = true;
+        this.initialized = false;
+        this.bgmLoop = null;
+        this.bgmSynth = null;
+        this.bgmGain = null;
+        this.currentMood = 'none'; // 'light' | 'quiet' | 'none'
+    }
+
+    async init() {
+        if (this.initialized) return;
+        try {
+            await Tone.start();
+            this.bgmGain = new Tone.Gain(0.12).toDestination();
+            this.bgmSynth = new Tone.PolySynth(Tone.Synth, {
+                oscillator: { type: "sine" },
+                envelope: { attack: 0.4, decay: 0.5, sustain: 0.4, release: 1.8 }
+            }).connect(this.bgmGain);
+
+            this.sfxSynth = new Tone.Synth({
+                oscillator: { type: "triangle" },
+                envelope: { attack: 0.01, decay: 0.12, sustain: 0, release: 0.1 }
+            }).toDestination();
+            this.sfxSynth.volume.value = -10;
+
+            this.initialized = true;
+        } catch (e) {
+            console.warn("Audio init skipped:", e);
+        }
+    }
+
+    toggle() {
+        this.enabled = !this.enabled;
+        if (!this.enabled) {
+            this.stopBGM();
+        } else if (this.currentMood !== 'none') {
+            this.playBGM(this.currentMood);
+        }
+        return this.enabled;
+    }
+
+    playTap() {
+        if (!this.enabled || !this.initialized) return;
+        this.sfxSynth.triggerAttackRelease("C5", "32n");
+    }
+
+    playSend() {
+        if (!this.enabled || !this.initialized) return;
+        const now = Tone.now();
+        this.sfxSynth.triggerAttackRelease("E5", "16n", now);
+        this.sfxSynth.triggerAttackRelease("A5", "16n", now + 0.08);
+    }
+
+    playReceive() {
+        if (!this.enabled || !this.initialized) return;
+        const now = Tone.now();
+        this.sfxSynth.triggerAttackRelease("G5", "32n", now);
+        this.sfxSynth.triggerAttackRelease("D5", "16n", now + 0.06);
+    }
+
+    playKeyType() {
+        if (!this.enabled || !this.initialized) return;
+        this.sfxSynth.triggerAttackRelease("C6", "64n");
+    }
+
+    playBGM(mood) {
+        this.currentMood = mood;
+        if (!this.enabled || !this.initialized) return;
+        this.stopBGM(false);
+
+        this.bgmGain.gain.cancelScheduledValues(Tone.now());
+        this.bgmGain.gain.value = mood === 'light' ? 0.10 : 0.08;
+
+        const lightNotes = [
+            ["C4", "E4"], ["G4"], ["A4", "C5"], ["G4"],
+            ["F4", "A4"], ["E4"], ["D4", "G4"], ["G4"]
+        ];
+        const quietNotes = [
+            ["F3", "C4", "A4"], null, ["E3", "B3", "G4"], null,
+            ["D3", "A3", "F4"], null, ["C3", "G3", "E4"], null
+        ];
+
+        const pattern = mood === 'light' ? lightNotes : quietNotes;
+        let step = 0;
+
+        this.bgmLoop = new Tone.Loop((time) => {
+            const chord = pattern[step % pattern.length];
+            if (chord) {
+                this.bgmSynth.triggerAttackRelease(chord, mood === 'light' ? "4n" : "1n", time);
+            }
+            step++;
+        }, mood === 'light' ? "2n" : "1m").start(0);
+
+        Tone.Transport.start();
+    }
+
+    fadeOutBGM(durationSec = 4) {
+        if (!this.initialized || !this.bgmGain) return;
+        this.bgmGain.gain.rampTo(0, durationSec);
+        setTimeout(() => {
+            this.stopBGM();
+        }, durationSec * 1000);
+    }
+
+    stopBGM(resetMood = true) {
+        if (resetMood) this.currentMood = 'none';
+        if (this.bgmLoop) {
+            this.bgmLoop.stop();
+            this.bgmLoop.dispose();
+            this.bgmLoop = null;
+        }
+    }
+}
+
+const sound = new SoundEngine();
+
+/**
+ * ============================================================================
+ * 3. セーブデータ＆状態管理
+ * ============================================================================
+ */
+const STORAGE_KEY = "kinou_no_ken_save_v1";
+
+const DEFAULT_SAVE = {
+    endingsSeen: [],
+    hintsGot: [],
+    unlockStage: 0,
+    eventsPlayed: [],
+    prologueSeen: false
+};
+
+let saveData = loadSaveData();
+let selectedPhrases = { 1: null, 2: null, 3: null, 4: null };
+
+function loadSaveData() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return JSON.parse(JSON.stringify(DEFAULT_SAVE));
+        const parsed = JSON.parse(raw);
+        return {
+            endingsSeen: Array.isArray(parsed.endingsSeen) ? parsed.endingsSeen : [],
+            hintsGot: Array.isArray(parsed.hintsGot) ? parsed.hintsGot : [],
+            unlockStage: typeof parsed.unlockStage === "number" ? parsed.unlockStage : 0,
+            eventsPlayed: Array.isArray(parsed.eventsPlayed) ? parsed.eventsPlayed : [],
+            prologueSeen: Boolean(parsed.prologueSeen)
+        };
+    } catch (e) {
+        return JSON.parse(JSON.stringify(DEFAULT_SAVE));
+    }
+}
+
+function persistSaveData() {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(saveData));
+    } catch (e) {
+        console.warn("Save failed:", e);
+    }
+    updateMetaCounters();
+}
+
+function resetSaveData() {
+    saveData = JSON.parse(JSON.stringify(DEFAULT_SAVE));
+    selectedPhrases = { 1: null, 2: null, 3: null, 4: null };
+    try {
+        localStorage.removeItem(STORAGE_KEY);
+    } catch (e) {}
+    updateMetaCounters();
+}
+
+function updateMetaCounters() {
+    document.getElementById("title-end-count").textContent = saveData.endingsSeen.length;
+    document.getElementById("compose-end-count").textContent = saveData.endingsSeen.length;
+    document.getElementById("memo-badge").textContent = saveData.hintsGot.length;
+}
+
+/**
+ * ============================================================================
+ * 4. フレーズ解決・判定ロジック（仕様書第5章・第6章・第7章）
+ * ============================================================================
+ */
+function getActiveStageChoices(stageNum) {
+    const rawList = PHRASE_DATA.stages[stageNum];
+    return rawList.map(item => {
+        if (item.hidden && saveData.unlockStage >= item.hidden.unlock) {
+            return {
+                id: item.hidden.id,
+                type: "hidden",
+                text: item.hidden.text
+            };
+        }
+        return {
+            id: item.id,
+            type: item.type,
+            text: item.text
+        };
+    });
+}
+
+function evaluateApology(p1, p2, p3, p4) {
+    const list = [p1, p2, p3, p4];
+    const funnyCount = list.filter(p => p.type === "funny").length;
+    const hiddenCount = list.filter(p => p.type === "hidden").length;
+
+    // 優先1: hidden == 4 -> TRUE
+    if (hiddenCount === 4) {
+        return { endId: "TRUE", funnyCount, hiddenCount };
+    }
+    // 優先2: funny >= 3 かつ ④が s4_1 -> FUN3
+    if (funnyCount >= 3 && p4.id === "s4_1") {
+        return { endId: "FUN3", funnyCount, hiddenCount };
+    }
+    // 優先3: funny == 4（④は s4_2 か s4_3） -> FUN2
+    if (funnyCount === 4) {
+        return { endId: "FUN2", funnyCount, hiddenCount };
+    }
+    // 優先4: funny == 3 -> FUN1
+    if (funnyCount === 3) {
+        return { endId: "FUN1", funnyCount, hiddenCount };
+    }
+    // 優先5: 上記以外 -> NORMAL
+    return { endId: "NORMAL", funnyCount, hiddenCount };
+}
+
+function buildNormalChatScript(hiddenCount) {
+    let secondLineReplacement = [{ type: "kashiwagi", text: "でも、そうじゃないんだよな" }];
+    if (hiddenCount === 1) {
+        secondLineReplacement = [
+            { type: "kashiwagi", text: "…そこは、わかってるんだ" },
+            { type: "kashiwagi", text: "でも、それだけじゃないんだよな" }
+        ];
+    } else if (hiddenCount === 2) {
+        secondLineReplacement = [
+            { type: "kashiwagi", text: "…あ" },
+            { type: "kashiwagi", text: "そっちも気づいたんだ" },
+            { type: "kashiwagi", text: "でも、まだあるんだよ" }
+        ];
+    } else if (hiddenCount === 3) {
+        secondLineReplacement = [
+            { type: "kashiwagi", text: "…だいぶ近い" },
+            { type: "kashiwagi", text: "あとちょっと" },
+            { type: "kashiwagi", text: "でも、まだ全部じゃない" }
+        ];
+    }
+
+    return [
+        { type: "kashiwagi", text: "ありがとう、ちゃんと書いてくれて" },
+        ...secondLineReplacement,
+        { type: "kashiwagi", text: "責めてるんじゃなくて" },
+        { type: "kashiwagi", text: "あの電車、いつも一本早いのが好きだったよね" },
+        { type: "kashiwagi", text: "…昔の話" },
+        { type: "kashiwagi", text: "ホームって、意外と広いんだよ" },
+        { type: "kashiwagi", text: "一人で立つと、特に" },
+        { type: "kashiwagi", text: "なんでもない。忘れて" }
+    ];
+}
+
+/**
+ * ============================================================================
+ * 5. 画面遷移・背景SVGアセット管理
+ * ============================================================================
+ */
+const screens = {
+    title: document.getElementById("screen-title"),
+    novel: document.getElementById("screen-novel"),
+    compose: document.getElementById("screen-compose"),
+    chat: document.getElementById("screen-chat"),
+    trueEnd: document.getElementById("screen-true-end")
+};
+
+function showScreen(name) {
+    Object.entries(screens).forEach(([key, el]) => {
+        if (key === name) {
+            el.classList.remove("hidden");
+        } else {
+            el.classList.add("hidden");
+        }
+    });
+}
+
+function getBackgroundSVG(type) {
+    if (type === "hotel") {
+        // ホテルの部屋の朝（ブラインドから差し込む朝の光）
+        return `<svg viewBox="0 0 400 800" class="w-full h-full object-cover" preserveAspectRatio="xMidYMid slice">
+            <defs>
+                <linearGradient id="morningGrad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#fef3c7"/>
+                    <stop offset="100%" stop-color="#e2e8f0"/>
+                </linearGradient>
+            </defs>
+            <rect width="400" height="800" fill="url(#morningGrad)"/>
+            <rect x="40" y="60" width="320" height="360" rx="8" fill="#ffffff" opacity="0.6"/>
+            <g stroke="#cbd5e1" stroke-width="3" opacity="0.6">
+                <line x1="40" y1="100" x2="360" y2="100"/><line x1="40" y1="130" x2="360" y2="130"/>
+                <line x1="40" y1="160" x2="360" y2="160"/><line x1="40" y1="190" x2="360" y2="190"/>
+                <line x1="40" y1="220" x2="360" y2="220"/><line x1="40" y1="250" x2="360" y2="250"/>
+                <line x1="40" y1="280" x2="360" y2="280"/><line x1="40" y1="310" x2="360" y2="310"/>
+            </g>
+        </svg>`;
+    }
+    if (type === "station") {
+        // 駅のホーム（朝の光）
+        return `<svg viewBox="0 0 400 800" class="w-full h-full object-cover" preserveAspectRatio="xMidYMid slice">
+            <defs>
+                <radialGradient id="sunBurst" cx="80%" cy="20%" r="80%">
+                    <stop offset="0%" stop-color="#fffbeb" stop-opacity="0.95"/>
+                    <stop offset="45%" stop-color="#fde68a" stop-opacity="0.5"/>
+                    <stop offset="100%" stop-color="#bae6fd" stop-opacity="0.2"/>
+                </radialGradient>
+            </defs>
+            <rect width="400" height="800" fill="#e0f2fe"/>
+            <rect width="400" height="800" fill="url(#sunBurst)"/>
+            <!-- 架線 -->
+            <line x1="0" y1="180" x2="400" y2="140" stroke="#64748b" stroke-width="1.5" opacity="0.4"/>
+            <line x1="0" y1="210" x2="400" y2="175" stroke="#64748b" stroke-width="1" opacity="0.3"/>
+            <!-- ホームの屋根と柱 -->
+            <polygon points="0,120 260,160 260,180 0,150" fill="#475569" opacity="0.35"/>
+            <rect x="80" y="155" width="14" height="480" fill="#64748b" opacity="0.3"/>
+            <!-- ホーム床面と点字ブロック -->
+            <polygon points="0,635 320,635 400,800 0,800" fill="#94a3b8" opacity="0.4"/>
+            <polygon points="270,635 288,635 350,800 325,800" fill="#facc15" opacity="0.55"/>
+            <!-- 線路 -->
+            <line x1="320" y1="635" x2="400" y2="730" stroke="#475569" stroke-width="3" opacity="0.4"/>
+        </svg>`;
+    }
+    return "";
+}
+
+function getShikishiPhotoSVG() {
+    // 机の端に四角い厚紙（色紙）の端が写っているだけの画像
+    return `<svg viewBox="0 0 240 160" class="w-48 h-32 rounded-xl border border-slate-200 shadow-sm bg-[#d6c7b2]">
+        <!-- 木目の机 -->
+        <rect width="240" height="160" fill="#c8b396"/>
+        <line x1="0" y1="40" x2="240" y2="45" stroke="#b59e7f" stroke-width="2"/>
+        <line x1="0" y1="110" x2="240" y2="105" stroke="#b59e7f" stroke-width="2"/>
+        <!-- 右下に覗く金縁の白い厚紙（色紙の角） -->
+        <g transform="translate(145, 78) rotate(-12)">
+            <rect x="0" y="0" width="120" height="120" rx="2" fill="#d4af37"/>
+            <rect x="4" y="4" width="112" height="112" fill="#faf8f5"/>
+            <!-- わずかに見えるペンの線 -->
+            <path d="M 22 35 Q 35 28 45 38" stroke="#94a3b8" stroke-width="1.5" fill="none" opacity="0.5"/>
+        </g>
+    </svg>`;
+}
+
+/**
+ * ============================================================================
+ * 6. ノベルパート進行エンジン（プロローグ / 結末 / 解放イベント / 真相ラスト）
+ * ============================================================================
+ */
+let novelState = {
+    steps: [],
+    currentIndex: 0,
+    onComplete: null,
+    isFinished: false
+};
+
+function startNovelScene(options) {
+    const {
+        theme = "light", // "light" | "dark" | "station"
+        badge = "",
+        skippable = false,
+        steps = [],
+        buttonText = "次へ",
+        onComplete = () => {}
+    } = options;
+
+    showScreen("novel");
+
+    const screenEl = document.getElementById("screen-novel");
+    const bgLayer = document.getElementById("novel-bg-layer");
+    const badgeEl = document.getElementById("novel-badge");
+    const skipBtn = document.getElementById("btn-novel-skip");
+    const container = document.getElementById("novel-text-container");
+    const tapHint = document.getElementById("novel-tap-hint");
+    const nextBtn = document.getElementById("btn-novel-next");
+
+    // テーマ適用
+    screenEl.className = "flex-1 min-h-0 flex flex-col p-6 relative transition-colors duration-1000 cursor-pointer";
+    bgLayer.innerHTML = "";
+    bgLayer.style.opacity = "0.25";
+
+    if (theme === "dark") {
+        screenEl.classList.add("bg-slate-950", "text-slate-100");
+        nextBtn.className = "hidden w-full py-3.5 rounded-xl font-medium tracking-wider shadow-sm transition bg-white text-slate-900 hover:bg-slate-200";
+    } else if (theme === "station") {
+        screenEl.classList.add("bg-sky-50", "text-slate-800");
+        bgLayer.innerHTML = getBackgroundSVG("station");
+        bgLayer.style.opacity = "0.65";
+        nextBtn.className = "hidden w-full py-3.5 rounded-xl font-medium tracking-wider shadow-sm transition bg-slate-900 text-white hover:bg-slate-800";
+    } else {
+        screenEl.classList.add("bg-[#f7f5f0]", "text-slate-800");
+        if (badge === "PROLOGUE") {
+            bgLayer.innerHTML = getBackgroundSVG("hotel");
+        }
+        nextBtn.className = "hidden w-full py-3.5 rounded-xl font-medium tracking-wider shadow-sm transition bg-slate-900 text-white hover:bg-slate-800";
+    }
+
+    badgeEl.textContent = badge === "PROLOGUE" ? "8:41" : badge;
+    if (skippable) {
+        skipBtn.classList.remove("hidden");
+    } else {
+        skipBtn.classList.add("hidden");
+    }
+
+    container.innerHTML = "";
+    tapHint.classList.remove("hidden");
+    nextBtn.classList.add("hidden");
+    nextBtn.textContent = buttonText;
+
+    novelState = {
+        steps,
+        currentIndex: 0,
+        onComplete,
+        isFinished: false,
+        fadeOutTriggered: false
+    };
+
+    // 最初の1ステップを表示
+    advanceNovelStep();
+}
+
+function advanceNovelStep() {
+    if (novelState.isFinished) return;
+
+    const scrollWrapper = document.getElementById("novel-scroll-wrapper");
+    const container = document.getElementById("novel-text-container");
+    const tapHint = document.getElementById("novel-tap-hint");
+    const nextBtn = document.getElementById("btn-novel-next");
+
+    if (novelState.currentIndex >= novelState.steps.length) {
+        novelState.isFinished = true;
+        tapHint.classList.add("hidden");
+        nextBtn.classList.remove("hidden");
+        document.getElementById("btn-novel-skip").classList.add("hidden");
+        return;
+    }
+
+    const step = novelState.steps[novelState.currentIndex];
+    novelState.currentIndex++;
+
+    // 真相エンド最後のモノローグ終盤でBGMフェードアウト
+    if (step.fadeOutBgm && !novelState.fadeOutTriggered) {
+        novelState.fadeOutTriggered = true;
+        sound.fadeOutBGM(4.5);
+    }
+
+    if (step.type === "line_box") {
+        // プロローグ内のLINE表示ボックス
+        const box = document.createElement("div");
+        box.className = "novel-line my-2 p-3.5 rounded-2xl bg-[#7494c0]/20 border border-[#7494c0]/30 space-y-2 font-sans text-xs";
+        step.messages.forEach(msg => {
+            const row = document.createElement("div");
+            row.className = "flex items-start gap-2";
+            row.innerHTML = `
+                <span class="shrink-0 px-1.5 py-0.5 rounded bg-slate-700 text-white text-[10px]">柏木</span>
+                <span class="bg-white text-slate-800 px-3 py-1.5 rounded-xl rounded-tl-none shadow-xs">${msg}</span>
+            `;
+            box.appendChild(row);
+        });
+        container.appendChild(box);
+        requestAnimationFrame(() => box.classList.add("visible"));
+    } else {
+        const p = document.createElement("p");
+        p.className = "novel-line whitespace-pre-wrap";
+        p.textContent = step.text;
+        container.appendChild(p);
+        requestAnimationFrame(() => p.classList.add("visible"));
+    }
+
+    // スクロールコンテナを最下部へ滑らかに追従
+    requestAnimationFrame(() => {
+        scrollWrapper.scrollTo({
+            top: scrollWrapper.scrollHeight,
+            behavior: "smooth"
+        });
+    });
+
+    // 最後の行を表示し終えたら即座に次へボタンを出す
+    if (novelState.currentIndex >= novelState.steps.length) {
+        novelState.isFinished = true;
+        tapHint.classList.add("hidden");
+        nextBtn.classList.remove("hidden");
+        document.getElementById("btn-novel-skip").classList.add("hidden");
+    }
+}
+
+document.getElementById("screen-novel").addEventListener("click", (e) => {
+    if (e.target.closest("button")) return;
+    if (!novelState.isFinished) {
+        sound.playTap();
+        advanceNovelStep();
+    }
+});
+
+document.getElementById("btn-novel-skip").addEventListener("click", () => {
+    sound.playTap();
+    if (novelState.onComplete) novelState.onComplete();
+});
+
+document.getElementById("btn-novel-next").addEventListener("click", () => {
+    sound.playTap();
+    if (novelState.onComplete) novelState.onComplete();
+});
+
+/**
+ * ============================================================================
+ * 7. プロローグ起動
+ * ============================================================================
+ */
+function playPrologue() {
+    sound.playBGM("light");
+    const isRepeat = saveData.prologueSeen;
+
+    const steps = [
+        { text: "頭が重い。" },
+        { text: "昨日は、三年ぶりに地元の同窓会に出た。\n三年前に転校して以来、ほとんどの人とは会っていなかった。" },
+        { text: "一次会までは、覚えている。\n二次会のカラオケの途中から、記憶がない。" },
+        { text: "スマホには、LINEが一件。" },
+        {
+            type: "line_box",
+            messages: [
+                "おはよう",
+                "昨日の件、ちゃんと謝って",
+                "文章で。長めでいいよ"
+            ]
+        },
+        { text: "柏木は、同窓会の幹事だった。" },
+        { text: "「昨日の件」が何のことなのか、わからない。" },
+        { text: "カメラロールを開くと、居酒屋のお通しの写真が十一枚あった。\n理由は、わからない。" },
+        { text: "ひとまず、長めに書くことにした。" }
+    ];
+
+    startNovelScene({
+        theme: "light",
+        badge: "PROLOGUE",
+        skippable: isRepeat,
+        steps,
+        buttonText: "▶ 謝罪文を組み立てる",
+        onComplete: () => {
+            saveData.prologueSeen = true;
+            persistSaveData();
+            enterComposeScreen();
+        }
+    });
+}
+
+/**
+ * ============================================================================
+ * 8. 謝罪文組み立て画面ロジック
+ * ============================================================================
+ */
+let currentEditingStage = null;
+
+function enterComposeScreen() {
+    showScreen("compose");
+    if (saveData.unlockStage >= 3) {
+        sound.playBGM("quiet");
+    } else {
+        sound.playBGM("light");
+    }
+    renderComposeScreen();
+}
+
+function renderComposeScreen() {
+    updateMetaCounters();
+
+    // プレビュー欄の構築（改行なし連結・自然折り返し）
+    const previewEl = document.getElementById("compose-preview");
+    previewEl.innerHTML = "";
+
+    const prefixSpan = document.createElement("span");
+    prefixSpan.textContent = PHRASE_DATA.prefix;
+    previewEl.appendChild(prefixSpan);
+
+    for (let s = 1; s <= 4; s++) {
+        const chosen = selectedPhrases[s];
+        const slotTextEl = document.getElementById(`slot-text-${s}`);
+        const span = document.createElement("span");
+
+        if (chosen) {
+            span.textContent = chosen.text;
+            span.className = "text-slate-900";
+            slotTextEl.textContent = chosen.text;
+            slotTextEl.className = "text-xs sm:text-sm text-slate-800 font-medium break-words mt-0.5";
+        } else {
+            span.textContent = `［${["①","②","③","④"][s-1]}］`;
+            span.className = "text-slate-300 mx-0.5";
+            slotTextEl.textContent = "？（タップして選択）";
+            slotTextEl.className = "text-xs sm:text-sm text-slate-400 break-words mt-0.5";
+        }
+        previewEl.appendChild(span);
+    }
+
+    // 送信ボタンの有効化判定
+    const allSelected = selectedPhrases[1] && selectedPhrases[2] && selectedPhrases[3] && selectedPhrases[4];
+    const sendBtn = document.getElementById("btn-send-apology");
+    if (allSelected) {
+        sendBtn.disabled = false;
+        sendBtn.textContent = "この文章を送信する";
+        sendBtn.className = "w-full py-3.5 rounded-xl font-bold text-sm tracking-wider transition bg-[#06c755] hover:bg-[#05b34c] text-white shadow-md active:scale-[0.99]";
+    } else {
+        sendBtn.disabled = true;
+        sendBtn.textContent = "4つすべて選択してください";
+        sendBtn.className = "w-full py-3.5 rounded-xl font-bold text-sm tracking-wider transition bg-slate-200 text-slate-400 cursor-not-allowed";
+    }
+}
+
+document.querySelectorAll(".slot-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+        sound.playTap();
+        const stageNum = Number(btn.dataset.stage);
+        openChoiceModal(stageNum);
+    });
+});
+
+function openChoiceModal(stageNum) {
+    currentEditingStage = stageNum;
+    const stageNames = {
+        1: "① 原因・理由を選択",
+        2: "② 昨夜の状況を選択",
+        3: "③ 現在のスタンスを選択",
+        4: "④ 結び・対応を選択"
+    };
+    document.getElementById("modal-choice-title").textContent = stageNames[stageNum];
+
+    const listEl = document.getElementById("modal-choice-list");
+    listEl.innerHTML = "";
+
+    // 番号順固定・見た目の区別一切なし（設計ルール3・4厳守）
+    const choices = getActiveStageChoices(stageNum);
+    choices.forEach((choice) => {
+        const isSelected = selectedPhrases[stageNum] && selectedPhrases[stageNum].id === choice.id;
+        const btn = document.createElement("button");
+        btn.className = `w-full text-left p-3.5 rounded-xl border text-[13px] sm:text-sm leading-relaxed transition ${
+            isSelected
+                ? "bg-slate-900 text-white border-slate-900 font-medium"
+                : "bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200"
+        }`;
+        btn.textContent = choice.text;
+        btn.addEventListener("click", () => {
+            sound.playTap();
+            selectedPhrases[stageNum] = choice;
+            closeChoiceModal();
+            renderComposeScreen();
+        });
+        listEl.appendChild(btn);
+    });
+
+    document.getElementById("modal-choices").classList.remove("hidden");
+}
+
+function closeChoiceModal() {
+    document.getElementById("modal-choices").classList.add("hidden");
+    currentEditingStage = null;
+}
+
+document.getElementById("btn-close-choices").addEventListener("click", () => {
+    sound.playTap();
+    closeChoiceModal();
+});
+
+document.getElementById("btn-clear-slots").addEventListener("click", () => {
+    sound.playTap();
+    selectedPhrases = { 1: null, 2: null, 3: null, 4: null };
+    renderComposeScreen();
+});
+
+/**
+ * ============================================================================
+ * 9. 送信 ＆ LINE風チャット返信演出（仕様書第4-2章・第9章）
+ * ============================================================================
+ */
+document.getElementById("btn-send-apology").addEventListener("click", () => {
+    const p1 = selectedPhrases[1];
+    const p2 = selectedPhrases[2];
+    const p3 = selectedPhrases[3];
+    const p4 = selectedPhrases[4];
+    if (!p1 || !p2 || !p3 || !p4) return;
+
+    sound.playSend();
+
+    const fullApologyText = PHRASE_DATA.prefix + p1.text + p2.text + p3.text + p4.text;
+    const result = evaluateApology(p1, p2, p3, p4);
+
+    if (result.endId === "TRUE") {
+        sound.playBGM("quiet");
+    }
+
+    runChatSequence(fullApologyText, result);
+});
+
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+async function runChatSequence(apologyText, result) {
+    showScreen("chat");
+
+    const messagesEl = document.getElementById("chat-messages");
+    const statusHint = document.getElementById("chat-status-hint");
+    const inputBar = document.getElementById("chat-input-bar");
+    const closeChatBtn = document.getElementById("btn-chat-to-ending");
+    const typingSim = document.getElementById("chat-typing-sim");
+    const placeholder = document.getElementById("chat-placeholder");
+
+    messagesEl.innerHTML = "";
+    inputBar.classList.remove("hidden");
+    closeChatBtn.classList.add("hidden");
+    typingSim.textContent = "";
+    placeholder.classList.remove("hidden");
+    statusHint.textContent = "送信済み";
+
+    const endData = ENDINGS_DATA[result.endId];
+
+    // 1. 送信した謝罪文を右側の吹き出しで表示（改行なし自然折り返し）
+    appendRightBubble(messagesEl, apologyText, endData.readTime, false);
+    await sleep(600);
+
+    // 送信直後に「既読」表示
+    const readLabel = messagesEl.querySelector(".read-status");
+    if (readLabel) {
+        readLabel.textContent = "既読";
+    }
+    statusHint.textContent = "柏木が入力中...";
+    await sleep(900);
+
+    // 2. スクリプト取得
+    const script = result.endId === "NORMAL"
+        ? buildNormalChatScript(result.hiddenCount)
+        : endData.chatScript;
+
+    // 3. 1行ずつ演出実行
+    for (const item of script) {
+        if (item.type === "kashiwagi") {
+            sound.playReceive();
+            appendLeftBubble(messagesEl, item.text);
+            // 行の長さに応じた時間差（0.8〜1.5秒目安）
+            const delay = Math.min(1550, Math.max(850, 650 + item.text.length * 32));
+            await sleep(delay);
+        } else if (item.type === "photo") {
+            sound.playReceive();
+            appendLeftPhotoBubble(messagesEl);
+            await sleep(1300);
+        } else if (item.type === "typing_indicator") {
+            statusHint.textContent = "柏木が入力中...";
+            const ind = appendTypingIndicator(messagesEl);
+            await sleep(item.duration || 3000);
+            ind.remove();
+        } else if (item.type === "gomen_erase") {
+            // 「ごめん」と1文字ずつ打ち、1秒待ってから1文字ずつ消す演出
+            statusHint.textContent = "";
+            placeholder.classList.add("hidden");
+            const word = ["ご", "め", "ん"];
+            for (let i = 0; i < word.length; i++) {
+                sound.playKeyType();
+                typingSim.textContent += word[i];
+                await sleep(280);
+            }
+            await sleep(1000);
+            for (let i = word.length; i > 0; i--) {
+                sound.playKeyType();
+                typingSim.textContent = typingSim.textContent.slice(0, -1);
+                await sleep(220);
+            }
+            placeholder.classList.remove("hidden");
+            await sleep(500);
+        } else if (item.type === "me") {
+            await sleep(400);
+            sound.playSend();
+            appendRightBubble(messagesEl, item.text, endData.readTime, true);
+            await sleep(900);
+        }
+    }
+
+    statusHint.textContent = "";
+    inputBar.classList.add("hidden");
+    closeChatBtn.classList.remove("hidden");
+    closeChatBtn.textContent = result.endId === "TRUE" ? "駅へ向かう" : "画面を閉じる";
+
+    closeChatBtn.onclick = () => {
+        sound.playTap();
+        handleEndReached(result.endId);
+    };
+}
+
+function appendRightBubble(container, text, timeStr, isReadImmediate) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "flex justify-end items-end gap-1.5 animate-fade-in";
+
+    const meta = document.createElement("div");
+    meta.className = "text-[10px] text-white/90 text-right shrink-0 leading-tight pb-0.5";
+    meta.innerHTML = `<div class="read-status">${isReadImmediate ? "既読" : ""}</div><div>${timeStr}</div>`;
+
+    const bubble = document.createElement("div");
+    bubble.className = "bubble-right px-3.5 py-2.5 text-[13px] sm:text-sm leading-relaxed max-w-[78%] break-words";
+    bubble.textContent = text;
+
+    wrapper.appendChild(meta);
+    wrapper.appendChild(bubble);
+    container.appendChild(wrapper);
+    container.scrollTop = container.scrollHeight;
+}
+
+function appendLeftBubble(container, text) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "flex items-start gap-2 animate-fade-in";
+
+    const avatar = document.createElement("div");
+    avatar.className = "w-7 h-7 rounded-full bg-slate-600 text-white text-[11px] flex items-center justify-center shrink-0 mt-0.5 font-bold";
+    avatar.textContent = "柏";
+
+    const bubble = document.createElement("div");
+    bubble.className = "bubble-left px-3.5 py-2.5 text-[13px] sm:text-sm leading-relaxed text-slate-800 max-w-[76%] break-words";
+    bubble.textContent = text;
+
+    wrapper.appendChild(avatar);
+    wrapper.appendChild(bubble);
+    container.appendChild(wrapper);
+    container.scrollTop = container.scrollHeight;
+}
+
+function appendLeftPhotoBubble(container) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "flex items-start gap-2 animate-fade-in";
+
+    const avatar = document.createElement("div");
+    avatar.className = "w-7 h-7 rounded-full bg-slate-600 text-white text-[11px] flex items-center justify-center shrink-0 mt-0.5 font-bold";
+    avatar.textContent = "柏";
+
+    const photoBox = document.createElement("div");
+    photoBox.className = "p-1.5 bg-white rounded-2xl rounded-tl-xs shadow-sm";
+    photoBox.innerHTML = getShikishiPhotoSVG();
+
+    wrapper.appendChild(avatar);
+    wrapper.appendChild(photoBox);
+    container.appendChild(wrapper);
+    container.scrollTop = container.scrollHeight;
+}
+
+function appendTypingIndicator(container) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "flex items-start gap-2 animate-fade-in";
+
+    const avatar = document.createElement("div");
+    avatar.className = "w-7 h-7 rounded-full bg-slate-600 text-white text-[11px] flex items-center justify-center shrink-0 mt-0.5 font-bold";
+    avatar.textContent = "柏";
+
+    const bubble = document.createElement("div");
+    bubble.className = "bubble-left px-4 py-3 flex items-center gap-1.5";
+    bubble.innerHTML = `
+        <span class="typing-dot w-2 h-2 rounded-full bg-slate-400 inline-block"></span>
+        <span class="typing-dot w-2 h-2 rounded-full bg-slate-400 inline-block"></span>
+        <span class="typing-dot w-2 h-2 rounded-full bg-slate-400 inline-block"></span>
+    `;
+
+    wrapper.appendChild(avatar);
+    wrapper.appendChild(bubble);
+    container.appendChild(wrapper);
+    container.scrollTop = container.scrollHeight;
+    return wrapper;
+}
+
+/**
+ * ============================================================================
+ * 10. 結末テキスト・ヒント加算・解放イベント順次再生（仕様書第7章・第9章）
+ * ============================================================================
+ */
+function handleEndReached(endId) {
+    const endData = ENDINGS_DATA[endId];
+
+    // エンド到達記録
+    if (!saveData.endingsSeen.includes(endId)) {
+        saveData.endingsSeen.push(endId);
+    }
+
+    // ヒント取得（重複加算しない）
+    endData.hints.forEach(hId => {
+        if (!saveData.hintsGot.includes(hId)) {
+            saveData.hintsGot.push(hId);
+        }
+    });
+
+    persistSaveData();
+
+    if (endId === "TRUE") {
+        // 真相エンドの最後のモノローグ（背景：駅のホーム・朝の光）
+        const steps = endData.epilogue.map((line, idx) => ({
+            text: line,
+            // 最後の数行でBGMをフェードアウト（仕様書第10章）
+            fadeOutBgm: idx >= endData.epilogue.length - 3
+        }));
+
+        startNovelScene({
+            theme: "station",
+            badge: "8時12分",
+            skippable: false,
+            steps,
+            buttonText: "次へ",
+            onComplete: () => {
+                showTrueEndCurtain();
+            }
+        });
+    } else {
+        // 通常・おふざけエンドの結末テキスト
+        const steps = endData.epilogue.map(line => ({ text: line }));
+        startNovelScene({
+            theme: "light",
+            badge: endData.title,
+            skippable: false,
+            steps,
+            buttonText: "▶ もう一度書く",
+            onComplete: () => {
+                checkAndPlayUnlockEvents();
+            }
+        });
+    }
+}
+
+function checkAndPlayUnlockEvents() {
+    const hintCount = saveData.hintsGot.length;
+    const pendingStages = [];
+
+    // 閾値を初めて超えた段階を順番にキューへ積む（複数段階またぎにも対応）
+    if (hintCount >= 2 && !saveData.eventsPlayed.includes(1)) {
+        pendingStages.push(1);
+    }
+    if (hintCount >= 4 && !saveData.eventsPlayed.includes(2)) {
+        pendingStages.push(2);
+    }
+    if (hintCount >= 6 && !saveData.eventsPlayed.includes(3)) {
+        pendingStages.push(3);
+    }
+
+    if (pendingStages.length === 0) {
+        enterComposeScreen();
+        return;
+    }
+
+    // 選択中フレーズをリセット（仕様書第7-2章）
+    selectedPhrases = { 1: null, 2: null, 3: null, 4: null };
+
+    const playNextEvent = () => {
+        if (pendingStages.length === 0) {
+            enterComposeScreen();
+            return;
+        }
+        const stage = pendingStages.shift();
+        saveData.unlockStage = Math.max(saveData.unlockStage, stage);
+        if (!saveData.eventsPlayed.includes(stage)) {
+            saveData.eventsPlayed.push(stage);
+        }
+        persistSaveData();
+
+        sound.playBGM("quiet");
+        const ev = UNLOCK_EVENTS[stage];
+        const steps = ev.lines.map(line => ({ text: line }));
+
+        startNovelScene({
+            theme: "dark",
+            badge: ev.title,
+            skippable: false,
+            steps,
+            buttonText: "▶ 謝罪文を組み立てる",
+            onComplete: playNextEvent
+        });
+    };
+
+    playNextEvent();
+}
+
+function showTrueEndCurtain() {
+    showScreen("trueEnd");
+    const endTextEl = document.getElementById("true-end-text");
+    const actionsEl = document.getElementById("true-end-actions");
+
+    endTextEl.classList.remove("opacity-100");
+    endTextEl.classList.add("opacity-0");
+    actionsEl.classList.add("hidden");
+
+    setTimeout(() => {
+        endTextEl.classList.remove("opacity-0");
+        endTextEl.classList.add("opacity-100");
+    }, 500);
+
+    setTimeout(() => {
+        actionsEl.classList.remove("hidden");
+    }, 2200);
+}
+
+document.getElementById("btn-true-end-finish").addEventListener("click", () => {
+    sound.playTap();
+    showScreen("title");
+    openEndingsModal();
+});
+
+document.getElementById("btn-share-x").addEventListener("click", () => {
+    sound.playTap();
+    const count = saveData.endingsSeen.length;
+    const shareText = `謝罪ミニゲーム「昨日の件」をクリアしました。（回収エンド：${count}/5）\n#昨日の件`;
+    const pageUrl = window.location.href;
+    const intentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(pageUrl)}`;
+    window.open(intentUrl, "_blank", "noopener,noreferrer");
+});
+
+/**
+ * ============================================================================
+ * 11. ヒントメモ画面・エンド一覧画面・確認ダイアログ
+ * ============================================================================
+ */
+function openMemoModal() {
+    const listEl = document.getElementById("memo-list");
+    listEl.innerHTML = "";
+
+    // 取得順に取得済みヒントを表示し、残りは「？」枠を並べる（総数6個）
+    saveData.hintsGot.forEach((hId, index) => {
+        const hintObj = HINTS_MASTER.find(h => h.id === hId);
+        if (!hintObj) return;
+        const card = document.createElement("div");
+        card.className = "p-3 rounded-xl bg-white border border-amber-200/80 text-xs text-slate-800 leading-relaxed shadow-2xs flex gap-2.5";
+        card.innerHTML = `
+            <span class="shrink-0 font-bold text-amber-600">${index + 1}.</span>
+            <span>${hintObj.text}</span>
+        `;
+        listEl.appendChild(card);
+    });
+
+    const remaining = 6 - saveData.hintsGot.length;
+    for (let i = 0; i < remaining; i++) {
+        const num = saveData.hintsGot.length + i + 1;
+        const emptyCard = document.createElement("div");
+        emptyCard.className = "p-3 rounded-xl bg-amber-100/40 border border-dashed border-amber-200 text-xs text-amber-800/40 flex gap-2.5";
+        emptyCard.innerHTML = `
+            <span class="shrink-0 font-bold">${num}.</span>
+            <span>？？？</span>
+        `;
+        listEl.appendChild(emptyCard);
+    }
+
+    document.getElementById("modal-memo").classList.remove("hidden");
+}
+
+function openEndingsModal() {
+    const listView = document.getElementById("endings-list-view");
+    const readView = document.getElementById("endings-read-view");
+    listView.classList.remove("hidden");
+    readView.classList.add("hidden");
+    listView.innerHTML = "";
+
+    const orderedEndings = Object.values(ENDINGS_DATA).sort((a, b) => a.order - b.order);
+
+    orderedEndings.forEach(endObj => {
+        const isSeen = saveData.endingsSeen.includes(endObj.id);
+        const btn = document.createElement("button");
+        btn.disabled = !isSeen;
+        btn.className = `w-full text-left p-3.5 rounded-xl border transition flex justify-between items-center ${
+            isSeen
+                ? "bg-white hover:bg-slate-50 border-slate-200 text-slate-800 shadow-2xs"
+                : "bg-slate-50 border-slate-100 text-slate-400 cursor-default"
+        }`;
+
+        btn.innerHTML = `
+            <div class="flex items-center gap-3">
+                <span class="text-xs font-mono px-2 py-0.5 rounded ${isSeen ? "bg-slate-800 text-white" : "bg-slate-200 text-slate-400"}">
+                    END ${endObj.order}
+                </span>
+                <span class="text-sm font-medium">${isSeen ? endObj.title : "？？？"}</span>
+            </div>
+            ${isSeen ? '<span class="text-xs text-slate-400">読む ›</span>' : ""}
+        `;
+
+        if (isSeen) {
+            btn.addEventListener("click", () => {
+                sound.playTap();
+                openRereadEnding(endObj);
+            });
+        }
+
+        listView.appendChild(btn);
+    });
+
+    document.getElementById("modal-endings").classList.remove("hidden");
+}
+
+function openRereadEnding(endObj) {
+    document.getElementById("endings-list-view").classList.add("hidden");
+    const readView = document.getElementById("endings-read-view");
+    readView.classList.remove("hidden");
+
+    document.getElementById("reread-title").textContent = endObj.title;
+    const contentEl = document.getElementById("reread-content");
+    contentEl.innerHTML = "";
+
+    endObj.epilogue.forEach(line => {
+        const p = document.createElement("p");
+        p.className = "whitespace-pre-wrap";
+        p.textContent = line;
+        contentEl.appendChild(p);
+    });
+}
+
+/**
+ * ============================================================================
+ * 12. イベントリスナー登録（ナビゲーション・リセット確認）
+ * ============================================================================
+ */
+document.getElementById("btn-sound-toggle").addEventListener("click", async () => {
+    await sound.init();
+    const isOn = sound.toggle();
+    document.getElementById("sound-icon").textContent = isOn ? "🔊" : "🔇";
+    document.getElementById("sound-label").textContent = isOn ? "音あり" : "音なし";
+    if (isOn) sound.playTap();
+});
+
+document.getElementById("btn-start").addEventListener("click", async () => {
+    await sound.init();
+    sound.playTap();
+    playPrologue();
+});
+
+document.getElementById("btn-compose-to-title").addEventListener("click", () => {
+    sound.playTap();
+    sound.stopBGM();
+    showScreen("title");
+});
+
+document.getElementById("btn-open-memo").addEventListener("click", () => {
+    sound.playTap();
+    openMemoModal();
+});
+
+document.getElementById("btn-close-memo").addEventListener("click", () => {
+    sound.playTap();
+    document.getElementById("modal-memo").classList.add("hidden");
+});
+
+document.getElementById("btn-title-endings").addEventListener("click", async () => {
+    await sound.init();
+    sound.playTap();
+    openEndingsModal();
+});
+
+document.getElementById("btn-open-endings").addEventListener("click", () => {
+    sound.playTap();
+    openEndingsModal();
+});
+
+document.getElementById("btn-close-endings").addEventListener("click", () => {
+    sound.playTap();
+    document.getElementById("modal-endings").classList.add("hidden");
+});
+
+document.getElementById("btn-back-to-endings-list").addEventListener("click", () => {
+    sound.playTap();
+    document.getElementById("endings-read-view").classList.add("hidden");
+    document.getElementById("endings-list-view").classList.remove("hidden");
+});
+
+// データ削除確認ダイアログ
+document.getElementById("btn-reset-confirm").addEventListener("click", async () => {
+    await sound.init();
+    sound.playTap();
+    document.getElementById("dialog-title").textContent = "最初からやり直す";
+    document.getElementById("dialog-message").textContent = "これまでに集めたメモやエンディングの記録をすべて消去して、最初の状態に戻しますか？";
+    document.getElementById("modal-dialog").classList.remove("hidden");
+});
+
+document.getElementById("btn-dialog-cancel").addEventListener("click", () => {
+    sound.playTap();
+    document.getElementById("modal-dialog").classList.add("hidden");
+});
+
+document.getElementById("btn-dialog-ok").addEventListener("click", () => {
+    sound.playTap();
+    resetSaveData();
+    document.getElementById("modal-dialog").classList.add("hidden");
+});
+
+// PCキーボード操作サポート（Enter/Spaceでノベル進行、1〜4でスロット選択、Escでモーダル閉じる）
+window.addEventListener("keydown", (e) => {
+    const modalChoices = document.getElementById("modal-choices");
+    const modalMemo = document.getElementById("modal-memo");
+    const modalEndings = document.getElementById("modal-endings");
+    const modalDialog = document.getElementById("modal-dialog");
+
+    // モーダルが開いている場合のEsc処理
+    if (e.key === "Escape") {
+        if (!modalDialog.classList.contains("hidden")) {
+            modalDialog.classList.add("hidden");
+            return;
+        }
+        if (!modalChoices.classList.contains("hidden")) {
+            closeChoiceModal();
+            return;
+        }
+        if (!modalMemo.classList.contains("hidden")) {
+            modalMemo.classList.add("hidden");
+            return;
+        }
+        if (!modalEndings.classList.contains("hidden")) {
+            modalEndings.classList.add("hidden");
+            return;
+        }
+    }
+
+    // ノベル画面表示中のキー操作
+    if (!screens.novel.classList.contains("hidden")) {
+        if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            if (!novelState.isFinished) {
+                sound.playTap();
+                advanceNovelStep();
+            } else {
+                const nextBtn = document.getElementById("btn-novel-next");
+                if (!nextBtn.classList.contains("hidden")) {
+                    nextBtn.click();
+                }
+            }
+        }
+        return;
+    }
+
+    // 組み立て画面表示中のショートカット（モーダルが閉じているとき）
+    const anyModalOpen = !modalChoices.classList.contains("hidden") ||
+                         !modalMemo.classList.contains("hidden") ||
+                         !modalEndings.classList.contains("hidden") ||
+                         !modalDialog.classList.contains("hidden");
+
+    if (!screens.compose.classList.contains("hidden") && !anyModalOpen) {
+        if (["1", "2", "3", "4"].includes(e.key)) {
+            sound.playTap();
+            openChoiceModal(Number(e.key));
+        }
+    }
+});
+
+// 初期描画
+window.addEventListener("DOMContentLoaded", () => {
+    updateMetaCounters();
+});
+</script>
+</body>
+</html>
